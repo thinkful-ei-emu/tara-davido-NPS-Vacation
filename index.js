@@ -1,14 +1,20 @@
 'use strict';
 
 const apiKey = "w4rEa9hoE0tiEke8xpTEJuSFgWllr1087DLeUvRB";
+const baseURL = "https://developer.nps.gov/api/v1/parks?"
 
 //This function accepts the parameters(an object) and converts them into a string.  
 function formatQueryParams(params){
-  const queryItems = params.stateCode.split(" ");
-  const stateCodeArray = [];
-  queryItems.forEach(state =>{
-    stateCodeArray.push(`stateCode=${state}`);
+  //end url => stateCode=tx&stateCode=md&stateCode=az&api_key=dfgdfg
+  //params.stateCode => "tx md az"
+  const stateCodeArray = params.stateCode.split(" ");
+  //stateCodeArray => ['tx', 'md', 'az']
+  const queryItems= [];
+  stateCodeArray.forEach(state =>{
+    queryItems.push(`stateCode=${state}`);
+    //['stateCode=tx', 'stateCode=md', 'stateCode=az']
   });
+  queryItems.push(`api_key=${apiKey}`);
   return stateCodeArray.join('&');   
 
 
@@ -29,7 +35,16 @@ function getParks(query, MaxResults = 10){
     apiKey,
     stateCode: query,
   }
+
+  const queryString = formatQueryParams(params);
+  /*
+  {
+    apiKey,
+    stateCode: "tx az md"
+  }
+  */
 }
+
 
 // fetch(url,options)
 
