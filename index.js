@@ -14,6 +14,7 @@ function formatQueryParams(params){
     queryItems.push(`stateCode=${state}`);
     //['stateCode=tx', 'stateCode=md', 'stateCode=az']
   });
+  queryItems.push(`limit=${MaxResults}`);
   queryItems.push(`api_key=${apiKey}`);
   return stateCodeArray.join('&');   
 
@@ -24,8 +25,21 @@ function formatQueryParams(params){
 //This line is going to take the input recieved from getParks and add the neccesary sections to the html file. 
 //Then dispaly those results.
 function displayResults(responseJson,maxResults){
-
+  $('#results-list').empty();
+  responseJson.data.forEach(park => {
+    $('#results-list').append(
+      `<li>
+        <h3><a href="${park.url}>${park.fullName}</a></h3>
+        <p>${park.description}</p>
+      </li>`
+    )
+  });
+  $('#results').removeClass('hidden');
 }
+//search through an object with an array of objects, each object representing a new park
+//loop through responseJson.data(park => )
+//display park.description, park.fullName, park.url
+
 
 
 //This function is going to accept input paramaters from a user and turn it into a searchable url. 
@@ -34,25 +48,36 @@ function getParks(query, MaxResults = 10){
   const params = {
     apiKey,
     stateCode: query,
+    MaxResults
   }
-
-  const queryString = formatQueryParams(params);
   /*
   {
     apiKey,
     stateCode: "tx az md"
   }
   */
+
+  const queryString = formatQueryParams(params);
+  const url = baseURL + queryString;
+
+  fetch(url)
+    .then(response => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw new Error(response.statusText);
+    })
+    .then(responseJson => displayResults(responseJson))
+    .catch(error => {
+      $('#js-error-message').text(`Something went wrong: ${err.message}`);
+    });
 }
 
-
-// fetch(url,options)
-
-
 // /This function watches the submit button and then when a user clicks it runs the getParks function. 
-function handlesubmit(){
-  $('#planning-form').submit(event =>{
+function handleSubmit(){
+  $('form').submit(event =>{
     event.preventDefault();
+    console.log("Just got a submit!");
     const searchTerm = $('.search-state').val();
     const MaxResults = $('.search-number').val();
     getParks(searchTerm,MaxResults);    
@@ -60,4 +85,4 @@ function handlesubmit(){
 
 }
 
-$(handlesubmit());
+$(handleSubmit());
